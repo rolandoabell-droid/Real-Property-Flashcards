@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- iPhone Notch & Safe Area Optimization -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- Standalone App Flags for iOS Home Screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Real Property">
+
+  <title>Real Property Flashcards</title>
+
+  <!-- React & Babel Standalone Compilers -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding-top: env(safe-area-inset-top, 20px);
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+      background-color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #1f2430;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo, useEffect } = React;
+
+    const CARDS = [{"section": "Terms Related to Possession", "term": "Ownership", "definition": "Ownership means a person holds title to land or other property."}, {"section": "Terms Related to Possession", "term": "Possession", "definition": "Possession is the right to dominion and control over property."}, {"section": "Terms Related to Possession", "term": "Actual Possession", "definition": "Actual possession is immediate and direct physical control over property."}, {"section": "Terms Related to Possession", "term": "Constructive Possession", "definition": "Constructive possession is a legal fiction recognizing possession even with no direct control or presence, as long as the person has the knowledge, ability, and intent to control the property."}, {"section": "Terms Related to Possession", "term": "Trespass", "definition": "Trespass is a claim to recover damages for injury to a person, property, or rights, caused directly by immediate force or violence."}, {"section": "Terms Related to Possession", "term": "Trespass to Chattels", "definition": "Trespass to chattels is a claim for damages from an intentional or negligent act that directly injures a chattel --- by taking, damaging, destroying, or interfering with the owner's possession of it."}, {"section": "Terms Related to Possession", "term": "Trespass to Land", "definition": "Trespass to land is a claim for damages from an intentional or negligent act that directly interferes with possession of land."}, {"section": "Terms Related to Possession", "term": "Trespass on the Case", "definition": "Trespass on the case is a claim for damages that occur as an indirect result of someone's negligent act, when it doesn't fit the usual trespass-to-land or trespass-to-chattels categories."}, {"section": "Terms Related to Possession", "term": "Trover", "definition": "Trover is a claim to recover damages for the wrongful conversion of personal property, or to recover actual possession of it."}, {"section": "Terms Related to Possession", "term": "Replevin", "definition": "Replevin is a claim to recover the possession of a specific thing that was taken, rather than its value."}, {"section": "Terms Related to Possession", "term": "Ejectment", "definition": "Ejectment is a claim to recover possession of land, brought by the person claiming the right to possess it."}, {"section": "Terms Related to Possession", "term": "Bailment", "definition": "Bailment is the delivery of personal property to another person for some purpose, under an express or implied contract."}, {"section": "Terms Related to Possession", "term": "Adverse Possession", "definition": "Adverse possession is a way of acquiring title to real property by possessing it against everyone, including the true owner, if the possession is actual, open and notorious, continuous, hostile and under a claim of right, and exclusive for the period required by statute."}, {"section": "Terms Related to Possession", "term": "Color of Title", "definition": "Color of title is possession of property under a claim of ownership based on a written document that appears to convey title but actually fails to do so because it's invalid or defective."}, {"section": "Terms Related to Possession", "term": "Tacking", "definition": "Tacking is combining a current adverse possessor's time with a prior possessor's period of possession to reach the continuous time required for adverse possession, as long as there is privity between them."}, {"section": "Terms Related to Possession", "term": "AOCHE Adverse Possession Elements", "definition": "Elements required to acquire title by adverse possession over the statutory period: Actual possession, Open & notorious, Continuous for the full statutory period, Hostile & under claim of right, and Exclusive."}, {"section": "Terms Related to Possession", "term": "Extent of Land Acquired (Color of Title)", "definition": "Adverse possessors generally acquire title only to the land actually possessed; however, possession under color of title (a defective deed) grants constructive possession of the entire parcel described in the deed."}, {"section": "Terms Related to Possession", "term": "Tolling for Owner Disabilities", "definition": "The statutory period for adverse possession is tolled (paused) if the true owner has a recognized disability (minority, insanity, imprisonment) at the moment adverse possession begins."}, {"section": "Terms Related to Estates", "term": "Estate", "definition": "An estate is a possessory interest in land that is or may become possessory, measured by some duration of time."}, {"section": "Terms Related to Estates", "term": "Present Estates", "definition": "Present estates are interests that give a present right to possession."}, {"section": "Terms Related to Estates", "term": "Words of Purchase", "definition": "Words of purchase are the words in a deed or will that identify the grantee --- the person who takes the estate."}, {"section": "Terms Related to Estates", "term": "Words of Limitation", "definition": "Words of limitation are the words in a deed or will that indicate the type of estate the grantee receives."}, {"section": "Terms Related to Estates", "term": "Future Estates", "definition": "Future estates are interests in land that may or will entitle the owner to possession in the future."}, {"section": "Terms Related to Estates", "term": "Fee Simple Absolute", "definition": "A fee simple absolute is the largest estate the law allows --- full possessory rights now and in the future, unlimited in duration, disposition, and descendability."}, {"section": "Terms Related to Estates", "term": "Defeasible Fees", "definition": "Defeasible fees are present interests of potentially infinite duration that can be terminated by the happening of a specified condition."}, {"section": "Terms Related to Estates", "term": "Fee Simple Determinable", "definition": "A fee simple determinable automatically terminates upon a stated event and reverts to the grantor (a possibility of reverter)."}, {"section": "Terms Related to Estates", "term": "Possibility of Reverter", "definition": "A possibility of reverter is the future interest kept by the grantor when conveying an estate conditioned on a stated event not happening; the estate automatically reverts when that condition occurs."}, {"section": "Terms Related to Estates", "term": "Fee Simple Subject to a Condition Subsequent", "definition": "This is a defeasible fee where the grantor keeps the power to terminate the grantee's estate upon a specified event --- but termination is not automatic."}, {"section": "Terms Related to Estates", "term": "Right of Re-Entry (Power of Termination)", "definition": "This is a future interest retained by the grantor, giving them the right to terminate the grantee's estate upon a specified event."}, {"section": "Terms Related to Estates", "term": "Fee Simple Subject to an Executory Limitation", "definition": "This defeasible fee terminates upon a specified event and vests title in a third party, rather than reverting to the grantor."}, {"section": "Terms Related to Estates", "term": "Fee Tail", "definition": "A fee tail is a present possessory interest that limits inheritance to lineal descendants of the grantee; if there are none, the property reverts to the grantor."}, {"section": "Terms Related to Estates", "term": "Life Estate", "definition": "A life estate's duration is measured by the life of the grantee or, in a per autre vie life estate, by the life of someone else."}, {"section": "Terms Related to Estates", "term": "Doctrine of Waste", "definition": "The doctrine of waste imposes a duty on a present possessor not to injure the interests of those holding a future interest."}, {"section": "Terms Related to Estates", "term": "Voluntary Waste", "definition": "Voluntary waste is waste that results from an intentional act."}, {"section": "Terms Related to Estates", "term": "Permissive Waste", "definition": "Permissive waste occurs when property is allowed to fall into disrepair, or the possessor fails to take reasonable measures to protect it from the elements."}, {"section": "Terms Related to Estates", "term": "Reversion", "definition": "A reversion is the future interest left in the grantor after conveying a lesser estate than they had; it becomes possessory after the natural termination of the earlier estate."}, {"section": "Terms Related to Estates", "term": "Vested Interests", "definition": "Vested interests are those where the owner and triggering event are certain, though the exact time of possession is unknown."}, {"section": "Terms Related to Estates", "term": "Remainders", "definition": "Remainders are future interests created in someone other than the grantor, which become possessory upon the natural expiration of a prior estate created in the same conveyance."}, {"section": "Terms Related to Estates", "term": "Vested Remainder Subject to Complete Divestment", "definition": "This is a vested remainder held by an existing, ascertained person but subject to a condition subsequent that could wipe it out entirely."}, {"section": "Terms Related to Estates", "term": "Vested Remainder Subject to Partial Divestment", "definition": "Also called subject to open, this is a vested remainder where one or more identified remaindermen exist, but their share could shrink if more people are later added to the class."}, {"section": "Terms Related to Estates", "term": "Condition Subsequent", "definition": "A condition subsequent occurs after an estate has already vested; when it happens, the remainder becomes possessory or is cut off."}, {"section": "Terms Related to Estates", "term": "Condition Precedent", "definition": "A condition precedent is an express condition, other than the natural termination of the earlier estate, that must occur before the remainder becomes possessory."}, {"section": "Terms Related to Estates", "term": "Contingent Remainder", "definition": "A contingent remainder is created in favor of an unborn or unascertained person, or is otherwise subject to a condition precedent."}, {"section": "Terms Related to Estates", "term": "Executory Interest", "definition": "An executory interest is a future interest in a third person that becomes possessory by cutting short a prior estate (shifting interest) or springing out of the grantor at a future date (springing interest)."}, {"section": "Terms Related to Estates", "term": "Doctrine of Merger", "definition": "The doctrine of merger occurs when a present interest merges into a future interest because the same person obtains immediate successive estates in the same land."}, {"section": "Terms Related to Estates", "term": "Rule in Shelley's Case", "definition": "This rule voids a remainder in the grantee's heirs: if one instrument creates a present interest in a person and a remainder in that same person's heirs, the person holding the present interest instead gets both estates."}, {"section": "Terms Related to Estates", "term": "Destructibility of Contingent Remainders", "definition": "This doctrine says a contingent remainder is destroyed if it does not vest at or before the termination of the preceding estate."}, {"section": "Terms Related to Estates", "term": "Restraints on Alienation", "definition": "Restraints on alienation are provisions in a deed, will, or mortgage that effectively restrain the grantee from conveying the estate --- either total or partial."}, {"section": "Terms Related to Estates", "term": "Total Restraint", "definition": "A total restraint seeks to preclude any transfer at all."}, {"section": "Terms Related to Estates", "term": "Partial Restraint", "definition": "A partial restraint limits who may be a transferee, sets a time limit, or restricts the manner of transfer."}, {"section": "Terms Related to Estates", "term": "Disabling Restraint", "definition": "A disabling restraint withholds from the grantee the power to transfer their interest."}, {"section": "Terms Related to Estates", "term": "Forfeiture Restraint", "definition": "A forfeiture restraint provides that if the grantee attempts to transfer their interest, it is forfeited to another person."}, {"section": "Terms Related to Estates", "term": "Promissory Restraint", "definition": "A promissory restraint is when the grantee promises not to transfer their interest."}, {"section": "Terms Related to Estates", "term": "Rule Against Perpetuities", "definition": "This rule voids any interest if there's any possibility it could vest more than twenty-one years after some life in being at the time the interest was created."}, {"section": "Terms Related to Estates", "term": "Concurrent Estates", "definition": "Concurrent estates are estates held at the same time by two or more people, each with the right to enjoy and possess the land simultaneously."}, {"section": "Terms Related to Estates", "term": "Joint Tenancy", "definition": "Joint tenancy is concurrent ownership where each co-tenant owns an undivided share, and the surviving co-tenant automatically takes the deceased's share."}, {"section": "Terms Related to Estates", "term": "Tenancy in Common", "definition": "Tenancy in common is a concurrent estate with no right of survivorship; each owner has a distinct, proportionate interest, freely transferable during life or by will."}, {"section": "Terms Related to Estates", "term": "Tenancy by the Entireties", "definition": "Tenancy by the entireties is a concurrent estate that can only be created between a husband and wife, with a right of survivorship, and cannot be split without both parties' consent."}, {"section": "Terms Related to Estates", "term": "Partition", "definition": "Partition is the remedy available to a joint tenant or tenant in common to terminate the co-tenancy and divide the property."}, {"section": "Terms Related to Estates", "term": "Co-Tenants' Rights & Duties", "definition": "Each co-tenant may possess the whole; must account to co-tenants for rents collected from third parties (and, on ouster, for the value of exclusive possession); may seek contribution for necessary repairs/carrying costs (taxes, mortgage) beyond their share; any co-tenant may seek judicial partition (in kind or by sale)."}, {"section": "Terms Related to Estates", "term": "Construing Ambiguous Grant Language", "definition": "Where language could be read as durational or conditional, or as a mere statement of purpose, courts disfavor forfeiture and construe in favor of a fee simple absolute (or a covenant) rather than a defeasible fee."}, {"section": "Terms Related to Estates", "term": "Dower", "definition": "Common law right of a surviving widow to a life estate in one-third of real property her husband owned during marriage; largely abolished today."}, {"section": "Terms Related to Estates", "term": "Curtesy", "definition": "Common law right of a surviving widower to a life estate in all of his deceased wife's real property; largely abolished today."}, {"section": "Terms Related to Estates", "term": "Future Interest Definition", "definition": "A non-possessory interest that may become possessory in the future; presently transferable, inheritable, and devisable."}, {"section": "Terms Related to Estates", "term": "Classification Checklist for Future Interests", "definition": "Analysis involves determining: (1) Who holds the interest --- grantor or transferee? (2) Does the prior estate end naturally or get cut short? (3) Classify: reversion, possibility of reverter, or right of entry (for grantor) vs. remainder or executory interest (for transferee)."}, {"section": "Terms Related to Estates", "term": "Vested vs. Contingent Remainder Checklist", "definition": "Vested: given to an ascertained, living person with no unmet condition precedent. Contingent: given to an unascertained person, or subject to an unmet condition precedent."}, {"section": "Terms Related to Estates", "term": "Doctrine of Worthier Title", "definition": "A grantor's conveyance of a life estate with remainder to their own 'heirs' voids the remainder --- the grantor instead keeps a reversion; today a rebuttable rule of construction in most states."}, {"section": "Terms Related to Estates", "term": "Class Gifts (Present vs. Future)", "definition": "A class gift is a gift to a group of persons uncertain in number at the time of the gift (e.g., 'children'); can be a present or future interest, which affects when the group closes."}, {"section": "Terms Related to Estates", "term": "Rule of Convenience (Class Closing)", "definition": "A class closes (later-born members can no longer join) as soon as any member of the class is entitled to demand immediate possession or distribution of the property."}, {"section": "Terms Related to Estates", "term": "All-or-Nothing Rule under RAP", "definition": "Under the Rule Against Perpetuities, if the interest of any single possible class member could vest too remotely (more than 21 years after a life in being), the entire class gift fails."}, {"section": "Terms Related to Landlord and Tenant", "term": "Leasehold", "definition": "A leasehold is an estate in land that forms the property relationship between landlord and tenant --- the tenant holds a present interest, and the landlord holds a future interest (reversion)."}, {"section": "Terms Related to Landlord and Tenant", "term": "Tenancy for Years", "definition": "A tenancy for years is a leasehold for a fixed period of time that automatically ends at the stated period, without either party needing to give notice."}, {"section": "Terms Related to Landlord and Tenant", "term": "Periodic Tenancy", "definition": "A periodic tenancy continues year to year or for successive periods until terminated with proper notice by either party; the start date is certain but the end date isn't, until notice is given."}, {"section": "Terms Related to Landlord and Tenant", "term": "Tenancy at Will", "definition": "A tenancy at will is a leasehold that is terminable at the will of either the landlord or the tenant."}, {"section": "Terms Related to Landlord and Tenant", "term": "Tenancy at Sufferance (Holdover Tenant)", "definition": "A tenancy at sufferance arises when a tenant wrongfully remains in possession after their lawful tenancy has expired."}, {"section": "Terms Related to Landlord and Tenant", "term": "Covenant of Quiet Enjoyment", "definition": "This covenant, implied even if not written, means neither the landlord nor anyone with a paramount title will interfere with the tenant's quiet enjoyment and possession, breached by actual eviction, partial actual eviction, or constructive eviction."}, {"section": "Terms Related to Landlord and Tenant", "term": "Implied Warranty of Habitability", "definition": "This warranty, implied in leases of urban dwellings even if not written, assures the leased premises are fit for human habitation and will remain so."}, {"section": "Terms Related to Landlord and Tenant", "term": "Retaliatory Eviction", "definition": "Retaliatory eviction is a defense against eviction, limiting a landlord's right to terminate a tenancy in retaliation for the tenant's housing-related actions."}, {"section": "Terms Related to Landlord and Tenant", "term": "Surrender", "definition": "Surrender is a mutual agreement between landlord and tenant that terminates the lease."}, {"section": "Terms Related to Landlord and Tenant", "term": "Abandonment (Landlord-Tenant)", "definition": "In the landlord-tenant context, abandonment is when a tenant leaves the premises before the tenancy has expired."}, {"section": "Terms Related to Landlord and Tenant", "term": "Assignment", "definition": "An assignment is a complete transfer of all of a tenant's interests and obligations to another person (the assignee)."}, {"section": "Terms Related to Landlord and Tenant", "term": "Sublease", "definition": "A sublease is when a tenant transfers part of their estate to another person; the sublessee is not liable for the original tenant's lease obligations unless they expressly assume them."}, {"section": "Terms Related to Landlord and Tenant", "term": "Contractual vs. Conveyance Nature of Leases", "definition": "Common law treated a lease primarily as a conveyance of an estate in land (independent covenants); modern law increasingly treats it as a contract, importing mutual dependency of covenants and implied warranties."}, {"section": "Terms Related to Landlord and Tenant", "term": "Landlord's Right to Refuse to Rent & Fair Housing", "definition": "Landlords historically had an unrestricted right to refuse to rent; modern fair housing laws prohibit refusal based on protected characteristics (race, religion, sex, national origin, familial status, disability)."}, {"section": "Terms Related to Landlord and Tenant", "term": "Delivery of Possession Rules", "definition": "Majority ('English') rule requires the landlord to deliver actual physical possession free of holdover tenants at lease start. Minority ('American') rule requires delivering only legal right to possession."}, {"section": "Terms Related to Landlord and Tenant", "term": "Landlord's Duty to Repair", "definition": "No general duty to repair existed at common law; modern law imposes a duty on landlords to maintain common areas and, via the implied warranty of habitability, keep residential premises fit for living."}, {"section": "Terms Related to Landlord and Tenant", "term": "Landlord Tort Liability Exceptions", "definition": "Landlords may be held liable in tort for injuries caused by dangerous conditions in common areas, undisclosed latent defects, negligent repairs, or public use leases."}, {"section": "Terms Related to Landlord and Tenant", "term": "Tenant's Obligation to Pay Rent", "definition": "The tenant's core contractual obligation; under modern law, the duty to pay rent is dependent on the landlord performing material obligations like maintaining habitability."}, {"section": "Nonpossessory Interests in Land", "term": "Nonpossessory Interests in Land", "definition": "Nonpossessory interests create a right to use land that is possessed by someone else."}, {"section": "Nonpossessory Interests in Land", "term": "Benefit", "definition": "A benefit is the right to use land possessed by someone else."}, {"section": "Nonpossessory Interests in Land", "term": "Burden", "definition": "A burden is the limitation on a possessor's right to use their own land, created by granting a benefit to someone else."}, {"section": "Nonpossessory Interests in Land", "term": "Appurtenant", "definition": "A benefit is appurtenant if it attaches to and benefits a piece of land; it automatically transfers with that land, even if not mentioned in the deed."}, {"section": "Nonpossessory Interests in Land", "term": "In Gross", "definition": "A benefit is in gross if it's meant to benefit the holder personally, not connected to any land they own; it does not transfer with land."}, {"section": "Nonpossessory Interests in Land", "term": "Servient Estate", "definition": "The servient estate is the parcel of land that bears the burden of a nonpossessory interest; there is always a servient estate."}, {"section": "Nonpossessory Interests in Land", "term": "Dominant Estate", "definition": "The dominant estate is the parcel of land that enjoys the benefit of a nonpossessory interest; it exists only if the benefit is appurtenant."}, {"section": "Nonpossessory Interests in Land", "term": "Easement", "definition": "An easement is a grant of a nonpossessory interest in land that entitles the holder to a limited use or enjoyment of land possessed by someone else."}, {"section": "Nonpossessory Interests in Land", "term": "Affirmative Easement", "definition": "An affirmative easement gives the holder the right to go onto and do acts upon the servient estate."}, {"section": "Nonpossessory Interests in Land", "term": "Negative Easement", "definition": "A negative easement prevents the servient estate's owner from making a use of their land that would otherwise be lawful."}, {"section": "Nonpossessory Interests in Land", "term": "Easement by Necessity", "definition": "An easement by necessity is created by implication when a grantor conveys land with no means of access except across the remaining land."}, {"section": "Nonpossessory Interests in Land", "term": "Easement by Prescription", "definition": "An easement by prescription is created through adverse use, generally requiring the same elements as adverse possession, maintained for the statutory period."}, {"section": "Nonpossessory Interests in Land", "term": "License", "definition": "A license grants the right to go upon land of another; it is not an interest in land but a privilege, revocable at the licensor's will."}, {"section": "Nonpossessory Interests in Land", "term": "Profits", "definition": "A profit is a nonpossessory interest entitling the holder to take some resource from the servient estate."}, {"section": "Nonpossessory Interests in Land", "term": "Exclusive Profits", "definition": "Exclusive profits grant a sole right to take resources, even to the exclusion of the servient owner."}, {"section": "Nonpossessory Interests in Land", "term": "Nonexclusive Profits", "definition": "Nonexclusive profits grant similar rights to others to remove resources from the same servient estate."}, {"section": "Nonpossessory Interests in Land", "term": "Surcharge Doctrine", "definition": "This doctrine says if a profit holder unfairly increases their use beyond what the original conveyance intended, the servient estate is surcharged and the profit is extinguished."}, {"section": "Nonpossessory Interests in Land", "term": "Covenants", "definition": "Covenants are nonpossessory interests that are promises to do or not do something regarding the use of land."}, {"section": "Nonpossessory Interests in Land", "term": "Affirmative Covenant", "definition": "An affirmative covenant promises that the holder of the servient estate will do something."}, {"section": "Nonpossessory Interests in Land", "term": "Negative Covenant", "definition": "A negative covenant promises that the holder of the servient estate will not do something they would otherwise be entitled to do."}, {"section": "Nonpossessory Interests in Land", "term": "Real Covenants", "definition": "Real covenants run with the land at law --- they are treated as attached to the land, enforceable by or against successors in interest."}, {"section": "Nonpossessory Interests in Land", "term": "Equitable Servitude", "definition": "An equitable servitude is a covenant, running with the land or not, that equity will enforce against assignees of the burdened land who have notice of the covenant."}, {"section": "Nonpossessory Interests in Land", "term": "Merger (Covenants)", "definition": "Merger terminates a covenant or servitude when the title to the benefitted and burdened land come into the same person's hands, merging into one fee simple."}, {"section": "Nonpossessory Interests in Land", "term": "Abandonment (Equitable Servitude)", "definition": "Abandonment is a defense to enforcing an equitable servitude, arising when restrictions are applied unequally, or when violations occur with general consent so the restriction's purpose can no longer be achieved."}, {"section": "Nonpossessory Interests in Land", "term": "Acquiescence", "definition": "Acquiescence is a defense to enforcing an equitable servitude: if the benefitted party failed to sue others who violated similar restrictions, they're treated as having acquiesced to this violation too."}, {"section": "Nonpossessory Interests in Land", "term": "Estoppel (Equitable Servitude)", "definition": "Estoppel is a defense to enforcing an equitable servitude: the benefitted party may be barred from enforcing it because their own acts led a reasonable person to believe it wouldn't be enforced, and that person relied on that belief."}, {"section": "Nonpossessory Interests in Land", "term": "Groundwater Rights Doctrines", "definition": "Rules governing underground water: Reasonable Use (owner may extract for beneficial use on overriding land), Correlative Rights (owners share proportionally), or Prior Appropriation (first beneficial user wins)."}, {"section": "Nonpossessory Interests in Land", "term": "Surface Water Doctrines", "definition": "Rules for rainwater/snowmelt: Common Enemy Rule (landowner may take any measure to divert unwanted water), Natural Flow Rule (cannot alter natural drainage), or Reasonable Use Compromise."}, {"section": "Nonpossessory Interests in Land", "term": "Watercourses Rights (Riparian vs. Prior Appropriation)", "definition": "Riparian Rights (eastern states: property owners bordering rivers/lakes share reasonable use) vs. Prior Appropriation (western states: first person to put water to beneficial use gets priority right)."}, {"section": "Nonpossessory Interests in Land", "term": "Lateral Support Rights", "definition": "Right to have land physically supported by adjoining land in its natural state; adjoining owner is strictly liable for excavation causing subsidence of natural land, but liable only for negligence if improved land collapses (unless natural land would have collapsed anyway)."}, {"section": "Nonpossessory Interests in Land", "term": "Subjacent Support Rights", "definition": "Right to have the surface of land supported by whoever holds underground mineral rights; subsurface excavators are strictly liable for surface collapse and damage to structures existing when mineral rights were severed."}, {"section": "Terms Related to Zoning", "term": "Nuisance", "definition": "A nuisance is anything that annoys or disturbs the free use of someone's property, or makes its ordinary use uncomfortable."}, {"section": "Terms Related to Zoning", "term": "Private Nuisance", "definition": "A private nuisance is conduct causing a substantial interference with the private use of land, either intentional and unreasonable, or unintentional but negligent."}, {"section": "Terms Related to Zoning", "term": "Zoning", "definition": "Zoning is the division of a jurisdiction into districts with permitted or prohibited uses, based on the state's police power and passed to cities and counties through enabling acts."}, {"section": "Terms Related to Zoning", "term": "Police Power", "definition": "Police power is the government's power to regulate conduct to promote public health, safety, and general welfare."}, {"section": "Terms Related to Zoning", "term": "Density Controls", "definition": "Density controls are zoning provisions that control how densely land is used, including height limits, yard setbacks, and lot size requirements."}, {"section": "Terms Related to Zoning", "term": "Conditional Use", "definition": "A conditional use is a zoning provision allowing an otherwise prohibited use if specified conditions are met."}, {"section": "Terms Related to Zoning", "term": "Variance", "definition": "A variance, usually granted by a Board of Adjustments, allows deviation from a zoning ordinance when enforcement would create unnecessary hardship due to the landowner's unique circumstances."}, {"section": "Terms Related to Zoning", "term": "Use Variance", "definition": "A use variance is a type of variance that permits an owner to carry on a use otherwise prohibited in that district."}, {"section": "Terms Related to Zoning", "term": "Contract Zoning", "definition": "Contract zoning allows a change in land use by the government contracting with a developer to rezone land, in exchange for the developer agreeing to develop it in a particular way."}, {"section": "Terms Related to Zoning", "term": "Floating Zones", "definition": "Floating zones are zoning devices that describe a zone and its permitted uses in the ordinance, but assign no specific land to it until later."}, {"section": "Terms Related to Zoning", "term": "Eminent Domain Takings Analysis", "definition": "Government may take private land for public use with just compensation. Physical occupation is a per se taking (Loretto). Total economic deprivation is a per se taking (Lucas). Otherwise analyzed under Penn Central balancing test."}, {"section": "Terms Related to Contracts and Deeds", "term": "Part Performance", "definition": "Part performance is an equitable doctrine that may let a court specifically enforce an oral contract for the sale of an interest in land."}, {"section": "Terms Related to Contracts and Deeds", "term": "Marketable Title", "definition": "Marketable title is title reasonably free from doubt --- one a reasonably prudent buyer would accept --- free from the possibility of litigation over the title; it is implied if not expressly required."}, {"section": "Terms Related to Contracts and Deeds", "term": "Equitable Conversion", "definition": "Equitable conversion treats the buyer as the owner of the land in equity once a sale contract is signed, while the seller holds a security interest for the purchase price."}, {"section": "Terms Related to Contracts and Deeds", "term": "Deed", "definition": "A deed is a writing used to transfer an interest in land, generally requiring the grantor's signature, words showing present intent to transfer, and a description of the land and parties."}, {"section": "Terms Related to Contracts and Deeds", "term": "Delivery", "definition": "Delivery refers to the grantor's intent to convey an interest in land, shown through words or conduct proving the deed has a present operative effect --- meaning title passes immediately and irrevocably, even if possession is postponed."}, {"section": "Terms Related to Contracts and Deeds", "term": "Conditional Delivery", "definition": "Conditional delivery is effective only upon a condition, typically involving two deliveries: first to a neutral third party, then to the grantee once the condition happens."}, {"section": "Terms Related to Contracts and Deeds", "term": "Relation Back Doctrine", "definition": "In an escrow situation, this doctrine holds that although title normally doesn't pass until the named conditions occur, under certain circumstances (like the grantor's death, incompetence, or a creditor attaching the grantor's title) the grantee's title will relate back to the time the deed was deposited in escrow."}, {"section": "Terms Related to Contracts and Deeds", "term": "Covenants for Title", "definition": "Covenants for title are assurances about the title conveyed that determine the seller's liability if a defect in title arises."}, {"section": "Terms Related to Contracts and Deeds", "term": "General Warranty Deed", "definition": "A general warranty deed warrants title against defects arising before and during the grantor's ownership, and normally contains all six usual covenants: seisin, right to convey, against encumbrances, quiet enjoyment, warranty, and further assurances."}, {"section": "Terms Related to Contracts and Deeds", "term": "Present Covenants", "definition": "Present covenants --- seisin, right to convey, and against encumbrances --- are breached, if at all, at the moment the covenant is made."}, {"section": "Terms Related to Contracts and Deeds", "term": "Future Covenants", "definition": "Future covenants --- quiet enjoyment, warranty, and further assurances --- are continuing promises not breached until the grantee's possession is disturbed."}, {"section": "Terms Related to Contracts and Deeds", "term": "Bona Fide Purchaser", "definition": "A bona fide purchaser is someone who acquires apparent legal title in good faith, for valuable consideration, and without notice of a competing claim from a common source of title."}, {"section": "Terms Related to Contracts and Deeds", "term": "Estoppel by Deed", "definition": "Estoppel by deed applies when a grantor conveys an estate they don't yet own, but later acquires title --- that later-acquired title automatically passes to the grantee."}, {"section": "Terms Related to Contracts and Deeds", "term": "Special Warranty Deed", "definition": "A special warranty deed contains the usual six covenants, but the grantor guarantees only that they have done nothing themselves to make the title defective."}, {"section": "Terms Related to Contracts and Deeds", "term": "Quitclaim Deed", "definition": "A quitclaim deed warrants nothing; the grantor simply transfers whatever right, title, or interest they may have, if any, at the time of conveyance."}, {"section": "Terms Related to Contracts and Deeds", "term": "Statute of Frauds Requirements (DIPPS)", "definition": "A land sale contract must generally be in writing and satisfy DIPPS: Description of land, Identification of parties, Purchase Price & payment terms, and Signature of party to be charged."}, {"section": "Terms Related to Contracts and Deeds", "term": "Real Estate Security Devices", "definition": "Instruments securing real estate debt: Mortgage (borrower gives lien to lender), Deed of Trust (title held by third-party trustee for fast non-judicial foreclosure), Installment Land Contract (seller keeps title until paid off), and Sale-Leaseback."}, {"section": "Terms Related to Contracts and Deeds", "term": "Covenant of Seisin", "definition": "A present title covenant in a deed where the grantor warrants that they actually own the legal estate purportedly conveyed."}, {"section": "Terms Related to Contracts and Deeds", "term": "Covenant of Right to Convey", "definition": "A present title covenant in a deed where the grantor warrants that they have the full legal power and authority to transfer the property."}, {"section": "Terms Related to Contracts and Deeds", "term": "Covenant Against Encumbrances", "definition": "A present title covenant in a deed where the grantor warrants that the land is free from unmentioned liens, mortgages, easements, or restrictions."}, {"section": "Terms Related to Contracts and Deeds", "term": "Covenant of Warranty", "definition": "A future title covenant in a deed where the grantor promises to defend the grantee against lawful claims of superior title brought by third parties."}, {"section": "Terms Related to Contracts and Deeds", "term": "Covenant of Further Assurances", "definition": "A future title covenant in a deed where the grantor promises to perform any necessary future acts or sign additional paperwork required to perfect the grantee's title."}, {"section": "Terms Related to Recording", "term": "First in Time, First in Right", "definition": "This common-law rule gives priority to the grantee who received their conveyance first in time, when there is more than one conveyance of the same land."}, {"section": "Terms Related to Recording", "term": "Recording Acts", "definition": "Recording acts protect subsequent bona fide purchasers by requiring buyers to record their interests, putting the world on notice; the three types are race acts (priority to whoever records first), notice acts (a later bona fide purchaser wins over an unrecorded earlier grantee if they had no notice), and race-notice acts (a later purchaser must both record first AND have no notice)."}, {"section": "Terms Related to Recording", "term": "Notice", "definition": "Notice requires that a bona fide purchaser have no knowledge of a prior conveyance at the time of their own purchase, in order to qualify for protection under the recording acts."}, {"section": "Terms Related to Recording", "term": "Actual Notice", "definition": "Actual notice is when the grantee actually knows of the prior conveyance."}, {"section": "Terms Related to Recording", "term": "Constructive Notice", "definition": "Constructive notice is notice the law imputes whether or not someone actually knew, because an instrument has been recorded."}, {"section": "Terms Related to Recording", "term": "Inquiry Notice", "definition": "Inquiry notice imposes a duty on the grantee to make reasonable inquiries under certain circumstances, charging them with whatever a reasonable inquiry would have revealed."}, {"section": "Terms Related to Recording", "term": "Wild Deed", "definition": "A wild deed is a recorded deed that is not recorded within the chain of title."}];
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function App() {
+      const sections = useMemo(() => {
+        const seen = [];
+        CARDS.forEach(c => { if (!seen.includes(c.section)) seen.push(c.section); });
+        return seen;
+      }, []);
+
+      const [activeSection, setActiveSection] = useState('All');
+      const [pos, setPos] = useState(0);
+      const [flipped, setFlipped] = useState(false);
+      const [known, setKnown] = useState({});
+      const [shuffleOn, setShuffleOn] = useState(false);
+
+      const deck = useMemo(() => {
+        const idxs = CARDS
+          .map((c, i) => ({ c, i }))
+          .filter(({ c }) => activeSection === 'All' || c.section === activeSection)
+          .map(({ i }) => i);
+        return shuffleOn ? shuffleArray(idxs) : idxs;
+      }, [activeSection, shuffleOn]);
+
+      useEffect(() => {
+        setPos(0);
+        setFlipped(false);
+      }, [activeSection, shuffleOn]);
+
+      const total = deck.length;
+      const currentIdx = deck[pos];
+      const current = CARDS[currentIdx];
+
+      const goNext = () => {
+        setFlipped(false);
+        setPos(p => (p + 1) % total);
+      };
+      const goPrev = () => {
+        setFlipped(false);
+        setPos(p => (p - 1 + total) % total);
+      };
+      const markKnown = (val) => {
+        setKnown(k => ({ ...k, [currentIdx]: val }));
+        goNext();
+      };
+      const resetProgress = () => {
+        setKnown({});
+        setPos(0);
+        setFlipped(false);
+      };
+
+      const knownCount = Object.values(known).filter(v => v === true).length;
+      const reviewCount = Object.values(known).filter(v => v === false).length;
+
+      if (total === 0) {
+        return <div style={{ padding: 24 }}>No cards in this section.</div>;
+      }
+
+      return (
+        <div style={{
+          maxWidth: 720,
+          margin: '0 auto',
+          padding: '10px 16px 32px',
+          width: '100%'
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 4px', color: '#2d2a4a' }}>
+              Real Property — Legal Definitions
+            </h1>
+            <p style={{ fontSize: 13, color: '#6b7280', margin: 0 }}>
+              {total} card{total !== 1 ? 's' : ''} in this set · Card {pos + 1} of {total}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 16 }}>
+            <select
+              value={activeSection}
+              onChange={(e) => setActiveSection(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: 10,
+                border: '1px solid #d8dae0',
+                fontSize: 13,
+                background: '#fff',
+                color: '#2d2a4a',
+                maxWidth: 280
+              }}
+            >
+              <option value="All">All Sections ({CARDS.length})</option>
+              {sections.map(s => {
+                const count = CARDS.filter(c => c.section === s).length;
+                return <option key={s} value={s}>{s} ({count})</option>;
+              })}
+            </select>
+
+            <button
+              onClick={() => setShuffleOn(s => !s)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 12px', borderRadius: 10,
+                border: '1px solid #d8dae0',
+                background: shuffleOn ? '#4f46e5' : '#fff',
+                color: shuffleOn ? '#fff' : '#2d2a4a',
+                fontSize: 13, cursor: 'pointer'
+              }}
+            >
+              <i data-lucide="shuffle" style={{ width: 14, height: 14 }}></i> Shuffle
+            </button>
+
+            <button
+              onClick={resetProgress}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 12px', borderRadius: 10,
+                border: '1px solid #d8dae0', background: '#fff', color: '#2d2a4a',
+                fontSize: 13, cursor: 'pointer'
+              }}
+            >
+              <i data-lucide="list-restart" style={{ width: 14, height: 14 }}></i> Reset
+            </button>
+          </div>
+
+          <div style={{ textAlign: 'center', fontSize: 12, color: '#6b7280', marginBottom: 10 }}>
+            {current.section}
+          </div>
+
+          <div
+            onClick={() => setFlipped(f => !f)}
+            style={{
+              perspective: '1200px',
+              cursor: 'pointer',
+              minHeight: 320,
+            }}
+          >
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              minHeight: 320,
+              transformStyle: 'preserve-3d',
+              transition: 'transform 0.5s',
+              transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+            }}>
+              {/* Front */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                backfaceVisibility: 'hidden',
+                background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                borderRadius: 16,
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                padding: 28, textAlign: 'center',
+                boxShadow: '0 8px 24px rgba(79,70,229,0.25)'
+              }}>
+                <div style={{ fontSize: 11, letterSpacing: 1.5, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', marginBottom: 14 }}>
+                  Term
+                </div>
+                <div style={{ fontSize: 26, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
+                  {current.term}
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 24 }}>
+                  Tap to reveal legal definition
+                </div>
+              </div>
+
+              {/* Back */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)',
+                background: '#fff',
+                border: '2px solid #4f46e5',
+                borderRadius: 16,
+                display: 'flex', flexDirection: 'column',
+                justifyContent: 'center',
+                padding: '24px 26px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                overflowY: 'auto'
+              }}>
+                <div style={{ fontSize: 11, letterSpacing: 1.5, color: '#9ca3af', textTransform: 'uppercase', marginBottom: 8, textAlign: 'center' }}>
+                  {current.term} — Legal Definition
+                </div>
+                <div style={{ fontSize: 15, lineHeight: 1.55, color: '#1f2430', textAlign: 'left' }}>
+                  {current.definition}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 20 }}>
+            <button onClick={goPrev} style={navBtn}>
+              <i data-lucide="chevron-left" style={{ width: 18, height: 18 }}></i>
+            </button>
+
+            <button onClick={() => markKnown(false)} style={{ ...actionBtn, background: '#fee2e2', color: '#b91c1c' }}>
+              <i data-lucide="x" style={{ width: 16, height: 16 }}></i> Review again
+            </button>
+
+            <button onClick={() => markKnown(true)} style={{ ...actionBtn, background: '#dcfce7', color: '#15803d' }}>
+              <i data-lucide="check" style={{ width: 16, height: 16 }}></i> Got it
+            </button>
+
+            <button onClick={goNext} style={navBtn}>
+              <i data-lucide="chevron-right" style={{ width: 18, height: 18 }}></i>
+            </button>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: 18, fontSize: 12, color: '#6b7280' }}>
+            <span style={{ color: '#15803d', fontWeight: 600 }}>✓ {knownCount} known</span> &nbsp;·&nbsp;
+            <span style={{ color: '#b91c1c', fontWeight: 600 }}>✕ {reviewCount} to review</span>
+          </div>
+        </div>
+      );
+    }
+
+    const navBtn = {
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      width: 42, height: 42, borderRadius: '50%',
+      border: '1px solid #d8dae0', background: '#fff', color: '#2d2a4a',
+      cursor: 'pointer'
+    };
+
+    const actionBtn = {
+      display: 'flex', alignItems: 'center', gap: 6,
+      padding: '10px 16px', borderRadius: 10,
+      border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer'
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+
+    // Render icons after React mounts
+    setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 100);
+  </script>
+</body>
+</html>
